@@ -3,6 +3,7 @@ use std::{
     error::Error,
 };
 
+use itertools::Itertools;
 use utils::read_input_file;
 
 fn calculate_char_intersection_sum(
@@ -28,7 +29,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut sum_part_1 = 0;
     for line in file_content.lines() {
-        let chars: Vec<_> = line.chars().collect();
+        let chars = line.chars().collect_vec();
         let (comp_1, comp_2) = chars.split_at(chars.len() / 2);
         let comp_1: HashSet<_> = comp_1.into_iter().collect();
         let comp_2: HashSet<_> = comp_2.into_iter().collect();
@@ -37,7 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     let mut sum_part_2 = 0;
-    for team_members in file_content.lines().collect::<Vec<_>>().chunks(3) {
+    for team_members in file_content.lines().collect_vec().chunks(3) {
         let comp_1: HashSet<_> = team_members[0].chars().collect();
         let comp_2: HashSet<_> = team_members[1].chars().collect();
         let comp_3: HashSet<_> = team_members[2].chars().collect();
