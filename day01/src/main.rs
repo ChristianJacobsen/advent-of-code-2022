@@ -1,11 +1,12 @@
 use std::error::Error;
 
+use itertools::Itertools;
 use utils::read_input_file;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file_content = read_input_file()?;
 
-    let mut loads: Vec<_> = file_content
+    let mut loads = file_content
         .split("\n\n")
         .map(|load| {
             load.lines().fold(0, |mut current, amount| {
@@ -13,7 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 current
             })
         })
-        .collect();
+        .collect_vec();
     loads.sort_by(|a, b| b.cmp(a));
 
     println!("Part 1: {}", loads.first().unwrap());
