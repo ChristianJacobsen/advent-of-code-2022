@@ -1,29 +1,27 @@
-use std::{error::Error, collections::HashSet};
+use std::{collections::HashSet, error::Error};
 
 use itertools::Itertools;
 use utils::read_input_file;
+
+fn last_index_of_n_unique_chars(slice: &[char], n: usize) -> Option<usize> {
+    for (i, w) in slice.windows(n).enumerate() {
+        let set: HashSet<_> = w.iter().collect();
+        if set.len() == n {
+            return Some(i + n);
+        }
+    }
+    None
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file_content = read_input_file()?;
     let chars = file_content.chars().collect_vec();
 
-    let mut part_1_index = 0;
-    for (i, w) in chars.windows(4).enumerate() {
-        let set: HashSet<_> = w.iter().collect();
-        if set.len() == 4 {
-            part_1_index = i + 4;
-            break;
-        }
-    }
+    let part_1_index =
+        last_index_of_n_unique_chars(&chars, 4).ok_or("could not calculate part 1")?;
 
-    let mut part_2_index = 0;
-    for (i, w) in chars.windows(14).enumerate() {
-        let set: HashSet<_> = w.iter().collect();
-        if set.len() == 14 {
-            part_2_index = i + 14;
-            break;
-        }
-    }
+    let part_2_index =
+        last_index_of_n_unique_chars(&chars, 14).ok_or("could not calculate part 2")?;
 
     println!("Part 1: {}", part_1_index);
     println!("Part 2: {}", part_2_index);
