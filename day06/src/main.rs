@@ -1,16 +1,13 @@
-use std::{collections::HashSet, error::Error};
+use std::error::Error;
 
 use itertools::Itertools;
 use utils::read_input_file;
 
 fn last_index_of_n_unique_chars(slice: &[char], n: usize) -> Option<usize> {
-    for (i, w) in slice.windows(n).enumerate() {
-        let set: HashSet<_> = w.iter().collect();
-        if set.len() == n {
-            return Some(i + n);
-        }
-    }
-    None
+    slice
+        .windows(n)
+        .position(|window| window.iter().all_unique())
+        .and_then(|pos| Some(pos + n))
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
