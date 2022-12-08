@@ -30,9 +30,19 @@ fn main() -> Result<(), Box<dyn Error>> {
                 trees_top.push(tree_row[j]);
             }
 
+            if trees_top.iter().all(|&tree| this_tree > tree) {
+                visible_trees += 1;
+                continue;
+            }
+
             let mut trees_left = Vec::new();
             for &tree in &trees[i][0..j] {
                 trees_left.push(tree);
+            }
+
+            if trees_left.iter().all(|&tree| this_tree > tree) {
+                visible_trees += 1;
+                continue;
             }
 
             let mut trees_bottom = Vec::new();
@@ -40,17 +50,19 @@ fn main() -> Result<(), Box<dyn Error>> {
                 trees_bottom.push(tree_row[j]);
             }
 
+            if trees_bottom.iter().all(|&tree| this_tree > tree) {
+                visible_trees += 1;
+                continue;
+            }
+
             let mut trees_right = Vec::new();
             for &tree in &trees[i][j + 1..width] {
                 trees_right.push(tree);
             }
 
-            if trees_top.iter().all(|&tree| this_tree > tree)
-                || trees_left.iter().all(|&tree| this_tree > tree)
-                || trees_bottom.iter().all(|&tree| this_tree > tree)
-                || trees_right.iter().all(|&tree| this_tree > tree)
-            {
+            if trees_right.iter().all(|&tree| this_tree > tree) {
                 visible_trees += 1;
+                continue;
             }
         }
     }
@@ -65,24 +77,19 @@ fn main() -> Result<(), Box<dyn Error>> {
             let mut visibility_top = 0;
             for tree_row in trees[0..i].iter().rev() {
                 let tree = tree_row[j];
-                if this_tree > tree {
-                    visibility_top += 1;
-                } else if this_tree == tree {
-                    visibility_top += 1;
-                    break;
-                } else {
+
+                visibility_top += 1;
+
+                if this_tree <= tree {
                     break;
                 }
             }
 
             let mut visibility_left = 0;
             for &tree in trees[i][0..j].iter().rev() {
-                if this_tree > tree {
-                    visibility_left += 1;
-                } else if this_tree == tree {
-                    visibility_left += 1;
-                    break;
-                } else {
+                visibility_left += 1;
+
+                if this_tree <= tree {
                     break;
                 }
             }
@@ -90,24 +97,19 @@ fn main() -> Result<(), Box<dyn Error>> {
             let mut visibility_bottom = 0;
             for tree_row in &trees[i + 1..height] {
                 let tree = tree_row[j];
-                if this_tree > tree {
-                    visibility_bottom += 1;
-                } else if this_tree == tree {
-                    visibility_bottom += 1;
-                    break;
-                } else {
+
+                visibility_bottom += 1;
+
+                if this_tree <= tree {
                     break;
                 }
             }
 
             let mut visibility_right = 0;
             for &tree in &trees[i][j + 1..width] {
-                if this_tree > tree {
-                    visibility_right += 1;
-                } else if this_tree <= tree {
-                    visibility_right += 1;
-                    break;
-                } else {
+                visibility_right += 1;
+
+                if this_tree <= tree {
                     break;
                 }
             }
