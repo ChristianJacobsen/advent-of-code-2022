@@ -17,7 +17,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     "/" => current_path = PathBuf::from("/"),
                     ".." => {
                         current_path.pop();
-                        ()
                     }
                     path => current_path.push(path),
                 };

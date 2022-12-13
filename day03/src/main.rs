@@ -13,10 +13,10 @@ fn calculate_char_intersection_sum(
     for char in intersection {
         match char {
             'A'..='Z' => {
-                sum += ((**char as u8) - ('A' as u8) + 27) as i32;
+                sum += ((**char as u8) - b'A' + 27) as i32;
             }
             'a'..='z' => {
-                sum += ((**char as u8) - ('a' as u8) + 1) as i32;
+                sum += ((**char as u8) - b'a' + 1) as i32;
             }
             _ => return Err(format!("found illegal character {}", char).into()),
         }
@@ -31,8 +31,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     for line in file_content.lines() {
         let chars = line.chars().collect_vec();
         let (comp_1, comp_2) = chars.split_at(chars.len() / 2);
-        let comp_1: HashSet<_> = comp_1.into_iter().collect();
-        let comp_2: HashSet<_> = comp_2.into_iter().collect();
+        let comp_1: HashSet<_> = comp_1.iter().collect();
+        let comp_2: HashSet<_> = comp_2.iter().collect();
         let intersection = comp_1.intersection(&comp_2);
         sum_part_1 += calculate_char_intersection_sum(intersection)?;
     }

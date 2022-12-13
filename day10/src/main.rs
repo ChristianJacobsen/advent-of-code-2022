@@ -29,13 +29,13 @@ impl FromStr for Instruction {
 const CRT_WIDTH: usize = 40;
 const CRT_HEIGHT: usize = 6;
 
-struct CRT {
+struct Crt {
     display: [char; CRT_WIDTH * CRT_HEIGHT],
     sprite_center: i32,
     cycle_counter: usize,
 }
 
-impl CRT {
+impl Crt {
     fn new() -> Self {
         Self {
             display: ['.'; CRT_WIDTH * CRT_HEIGHT],
@@ -69,13 +69,13 @@ impl CRT {
     }
 }
 
-impl Display for CRT {
+impl Display for Crt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for i in 0..CRT_HEIGHT {
             for j in 0..CRT_WIDTH {
                 write!(f, "{}", self.display[i * CRT_WIDTH + j])?;
             }
-            writeln!(f, "")?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -110,7 +110,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let part_1_sum = interesting_frequencies.iter().sum::<i32>();
 
-    let mut crt = CRT::new();
+    let mut crt = Crt::new();
     for instruction in &instructions {
         crt.process(instruction);
     }

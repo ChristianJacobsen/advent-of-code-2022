@@ -73,7 +73,7 @@ impl FromStr for Monkey {
         let false_throw_to = false_throw_to.parse::<usize>()?;
 
         Ok(Self {
-            items: starting_items.into(),
+            items: starting_items,
             items_visited: 0,
             operation,
             test_divisor,

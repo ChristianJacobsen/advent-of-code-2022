@@ -28,10 +28,7 @@ impl Stack {
         let mut to_be_moved = Vec::new();
 
         for _ in 0..n {
-            let c = self
-                .crates
-                .pop()
-                .ok_or(format!("could not pop from crates"))?;
+            let c = self.crates.pop().ok_or("could not pop from crates")?;
             to_be_moved.push(c);
         }
 

@@ -145,7 +145,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut in_order_indices = Vec::new();
     for (i, (first, second)) in pairs.iter().enumerate() {
-        if let Some(ordering) = cmp_node(&first, &second) {
+        if let Some(ordering) = cmp_node(first, second) {
             if ordering == Ordering::Less {
                 in_order_indices.push(i + 1);
             }

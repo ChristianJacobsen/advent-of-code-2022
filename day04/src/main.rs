@@ -28,7 +28,7 @@ impl Range {
     }
 
     fn overlaps(&self, r: &Self) -> bool {
-        return self.start <= r.end && self.end >= r.start;
+        self.start <= r.end && self.end >= r.start
     }
 
     fn fully_overlaps(&self, r: &Self) -> bool {

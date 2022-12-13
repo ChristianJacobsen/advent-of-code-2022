@@ -94,7 +94,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let new_tail_position = get_new_tail_position(&new_head_position, &tail_position);
 
             if new_tail_position != tail_position {
-                visited_tail_positions.insert(new_tail_position.clone());
+                visited_tail_positions.insert(new_tail_position);
             }
 
             head_position = new_head_position;
@@ -136,7 +136,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
                 let is_last_tail = i + 2 == positions.len();
                 if is_last_tail && new_tail_position != old_tail_position {
-                    visited_last_tail_positions.insert(new_tail_position.clone());
+                    visited_last_tail_positions.insert(new_tail_position);
                 }
 
                 positions[i] = new_head_position;

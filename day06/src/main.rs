@@ -7,7 +7,7 @@ fn last_index_of_n_unique_chars(slice: &[char], n: usize) -> Option<usize> {
     slice
         .windows(n)
         .position(|window| window.iter().all_unique())
-        .and_then(|pos| Some(pos + n))
+        .map(|pos| pos + n)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
