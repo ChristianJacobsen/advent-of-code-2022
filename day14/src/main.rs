@@ -1,204 +1,107 @@
-use std::{error::Error, fmt::Display, thread::sleep, time::Duration, vec};
+use std::{
+    cmp::{max, Ordering},
+    collections::HashSet,
+    error::Error,
+};
 
 use itertools::Itertools;
 use utils::read_input_file;
 
-#[derive(Clone, PartialEq)]
-enum Block {
-    Air,
-    Rock,
-    Sand,
-    SandSpawn,
-}
-
-impl Display for Block {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Block::Air => write!(f, "."),
-            Block::Rock => write!(f, "#"),
-            Block::Sand => write!(f, "o"),
-            Block::SandSpawn => write!(f, "+"),
-        }
-    }
-}
-
-#[derive(Debug)]
-struct Path((usize, usize), (usize, usize));
-
-fn create_grid_from_path(
-    rock_paths: &[Path],
-    smallest_x: usize,
-    largest_x: usize,
-    largest_y: usize,
-    with_floor: bool,
-) -> Vec<Vec<Block>> {
-    Vec::new()
-}
-
-fn print_grid(grid: &Vec<Vec<Block>>) {
-    for row in grid {
-        for entry in row {
-            print!("{}", entry);
-        }
-        println!();
+fn signum(val: i32) -> i32 {
+    match val.cmp(&0) {
+        Ordering::Less => -1,
+        Ordering::Equal => 0,
+        Ordering::Greater => 1,
     }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let file_content = read_input_file()?;
 
-    let mut smallest_x = usize::MAX;
-    let mut largest_x = usize::MIN;
-    let mut largest_y = usize::MIN;
+    let mut rock_and_sand_positions = HashSet::new();
 
-    let mut rock_paths = Vec::new();
     for line in file_content.lines() {
-        let parts = line.split(" -> ").collect_vec();
-        for window in parts.windows(2) {
-            match window {
-                &[start, end] => {
-                    let (start_x, start_y) =
-                        start.split_once(',').ok_or("could not split start")?;
-                    let (end_x, end_y) = end.split_once(',').ok_or("could not split end")?;
+        let mut prev = None;
 
-                    let start_x = start_x.parse::<usize>()?;
-                    let start_y = start_y.parse::<usize>()?;
-                    let end_x = end_x.parse::<usize>()?;
-                    let end_y = end_y.parse::<usize>()?;
+        for point in line.split(" -> ") {
+            let (x, y) = point.split_once(',').ok_or("could not split point")?;
 
-                    if start_x < smallest_x {
-                        smallest_x = start_x;
-                    }
+            let x = x.parse::<i32>()?;
+            let y = y.parse::<i32>()?;
 
-                    if end_x < smallest_x {
-                        smallest_x = end_x;
-                    }
+            if let Some((prev_x, prev_y)) = prev {
+                let x_diff: i32 = x - prev_x;
+                let y_diff: i32 = y - prev_y;
 
-                    if start_x > largest_x {
-                        largest_x = start_x;
-                    }
+                let length = max(x_diff.abs(), y_diff.abs());
 
-                    if end_x > largest_x {
-                        largest_x = end_x;
-                    }
+                for i in 0..length + 1 {
+                    let x = prev_x + i * signum(x_diff);
+                    let y = prev_y + i * signum(y_diff);
 
-                    if start_y > largest_y {
-                        largest_y = start_y;
-                    }
-
-                    if end_y > largest_y {
-                        largest_y = end_y;
-                    }
-
-                    rock_paths.push(Path((start_x, start_y), (end_x, end_y)));
+                    rock_and_sand_positions.insert((x, y));
                 }
-                _ => return Err("unexpected window".into()),
             }
+
+            prev = Some((x, y))
         }
     }
 
-    let width = largest_x - smallest_x + 1;
-    let height = largest_y;
-    let mut grid = vec![vec![Block::Air; width]; height];
+    let (_, max_y) = rock_and_sand_positions
+        .iter()
+        .max_by_key(|(_, y)| y)
+        .ok_or("could not get max y")?;
+    let floor_y = max_y + 2;
 
-    let sand_spawn_x = 500 - smallest_x;
-    grid[0][sand_spawn_x] = Block::SandSpawn;
+    let (&(min_x, _), &(max_x, _)) = rock_and_sand_positions
+        .iter()
+        .minmax_by_key(|(x, _)| x)
+        .into_option()
+        .ok_or("could not get min and max x")?;
 
-    for &Path((start_x, start_y), (end_x, end_y)) in &rock_paths {
-        let y_diff = end_y as i32 - start_y as i32;
+    let min_x = min_x - 5000;
+    let max_x = max_x + 5000;
 
-        if y_diff < 0 {
-            // Up
-            let x = start_x - smallest_x;
-            for y in end_y - 1..start_y {
-                grid[y][x] = Block::Rock;
-            }
-        } else if y_diff == 0 {
-            // Left or Right
-            let x_diff = end_x as i32 - start_x as i32;
-
-            if x_diff < 0 {
-                // Left
-                let y = start_y - 1;
-                for x in end_x - smallest_x..=start_x - smallest_x {
-                    grid[y][x] = Block::Rock;
-                }
-            } else if x_diff == 0 {
-                // Should never happen
-                panic!("we should never have a (0, 0) diff path");
-            } else {
-                // Right
-                let y = start_y - 1;
-                for x in start_x - smallest_x..=end_x - smallest_x {
-                    grid[y][x] = Block::Rock;
-                }
-            }
-        } else {
-            // Down
-            let x = start_x - smallest_x;
-            for y in start_y - 1..end_y {
-                grid[y][x] = Block::Rock;
-            }
-        }
+    for x in min_x..max_x {
+        rock_and_sand_positions.insert((x, floor_y));
     }
 
-    let mut sand_block_count = 0;
+    let mut part_1_sum = 0;
+    let mut part_2_sum = 0;
 
-    loop {
-        let mut sand_has_fallen_off = false;
+    let sand_spawner = (500, 0);
 
-        let mut x = sand_spawn_x;
-        let mut y = 0;
+    for i in 0..i32::MAX {
+        let mut sand_block = sand_spawner;
 
         loop {
-            match grid[y + 1][x] {
-                Block::Air => {
-                    if y == height - 2 {
-                        sand_has_fallen_off = true;
-                        break;
-                    }
+            let (sand_block_x, sand_block_y) = sand_block;
 
-                    y += 1;
-                }
-                Block::Rock | Block::Sand => {
-                    if x == 0 {
-                        sand_has_fallen_off = true;
-                        break;
-                    }
+            if sand_block_y + 1 >= floor_y && part_1_sum == 0 {
+                part_1_sum = i;
+            }
 
-                    if grid[y + 1][x - 1] == Block::Air {
-                        x -= 1;
-                        continue;
-                    }
-
-                    if x == width - 1 {
-                        sand_has_fallen_off = true;
-                        break;
-                    }
-
-                    if grid[y + 1][x + 1] == Block::Air {
-                        x += 1;
-                        continue;
-                    }
-
-                    grid[y][x] = Block::Sand;
-                    sand_block_count += 1;
-                    break;
-                }
-                Block::SandSpawn => panic!("should never get a SandSpawn block"),
+            if !rock_and_sand_positions.contains(&(sand_block_x, sand_block_y + 1)) {
+                sand_block = (sand_block_x, sand_block_y + 1);
+            } else if !rock_and_sand_positions.contains(&(sand_block_x - 1, sand_block_y + 1)) {
+                sand_block = (sand_block_x - 1, sand_block_y + 1);
+            } else if !rock_and_sand_positions.contains(&(sand_block_x + 1, sand_block_y + 1)) {
+                sand_block = (sand_block_x + 1, sand_block_y + 1);
+            } else {
+                break;
             }
         }
 
-        if sand_has_fallen_off {
+        if sand_block == sand_spawner {
+            part_2_sum = i + 1;
             break;
         }
+
+        rock_and_sand_positions.insert(sand_block);
     }
 
-    print_grid(&grid);
-
-    let part_1_sum = sand_block_count;
-
     println!("Part 1: {}", part_1_sum);
+    println!("Part 2: {}", part_2_sum);
 
     Ok(())
 }
